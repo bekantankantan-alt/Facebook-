@@ -1,10 +1,12 @@
-name: Build APK from uploaded ZIP
+
+name: Build Facebook Akun Tumbal APK
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'Facebook_Akun_Tumbal_Project.zip'
+      - 'Facebook_Akun_Tumbal_UPLOAD_SATU_ZIP.zip'
+      - '.github/workflows/build-from-zip.yml'
 
 jobs:
   build:
@@ -20,11 +22,22 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Extract outer ZIP
+        run: |
+          unzip -o Facebook_Akun_Tumbal_UPLOAD_SATU_ZIP.zip -d uploaded
+
       - name: Extract Android project ZIP
         run: |
-          unzip -o Facebook_Akun_Tumbal_Project.zip -d project
+          unzip -o uploaded/Facebook_Akun_Tumbal_Project.zip -d project
 
-      - name: Build APK
+      - name: Check project files
+        run: |
+          ls -la project
+          test -f project/settings.gradle
+          test -f project/app/build.gradle
+          test -f project/app/src/main/assets/index.html
+
+      - name: Build debug APK
         run: |
           cd project
           gradle --no-daemon assembleDebug
@@ -34,3 +47,4 @@ jobs:
         with:
           name: Facebook-Akun-Tumbal-debug-apk
           path: project/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
